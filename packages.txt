@@ -1,3 +1,4 @@
+iptables-persistent
 git
 ssh
 openssh
