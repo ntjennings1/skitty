@@ -1,2 +1,8 @@
+git
+ssh
+openssh
+python3.13
+python3.13-venv
+python3.13-tk
 cewl
 aircrack-ng
