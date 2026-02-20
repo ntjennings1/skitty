@@ -1,16 +1,12 @@
 #!/usr/bin/env bash
-# Network Node Mapper
-# A pure Bash script to discover live hosts on the local /24 network via ping sweep,
-# gather basic details (hostname via reverse DNS, MAC via ip neigh), and display
-# them in an interactive dialog menu system.
-#
-# Requirements:
-# - dialog (for the menu UI)
-# - Standard utilities: ip, ping, getent, awk, sort
-#
-# Note: Assumes a /24 subnet (common for home/SOHO networks). If your network uses
-# a different prefix (e.g., /23 or /22), the scan will be incomplete or incorrect.
-# Runs without root privileges.
+
+function throw_exec(){
+  if [ "$1" = "nv" ]; then
+    echo "[ERR] Error running netvet."
+  elif [ "$1" = "mac" ]; then
+    echo "[ERR] Error finding mac address."
+  fi
+}
 
 set -euo pipefail
 IFS=$'\n\t'
@@ -54,10 +50,7 @@ scan_network() {
         # Reverse hostname lookup (may return multiple aliases)
         hostname=$(getent hosts "$ip" 2>/dev/null | awk '{print $NF}' | sort -u | paste -sd "," - || echo "unknown")
 
-        # MAC address from neighbor table
-        mac=$(ip neigh show dev "$interface" to "$ip" 2>/dev/null | awk '{print toupper($5)}' || echo "unknown")
-
-        item="$(printf "%-15s %-30s %s" "$ip" "$hostname" "$mac")"
+        item="$(printf "%-15s"  "$hostname")"
         menu_options+=("$ip" "$item")
     done
 }
@@ -77,10 +70,9 @@ while true; do
     exec 3>&1
     selection=$(dialog \
         --clear \
-        --backtitle "Network Mapper – ${#alive_ips[@]} nodes on $subnet.0/24" \
+        --backtitle "NetVet – ${#alive_ips[@]} nodes on $subnet.0/24" \
         --title "Discovered Nodes" \
         --cancel-label "Exit" \
-        --extra-button --extra-label "Rescan" \
         --menu "Select a node for details (IP            Hostname(s)                    MAC)" \
         0 0 0 \
         "${menu_options[@]}" \
@@ -92,28 +84,22 @@ while true; do
         0)  # OK – node selected
             selected_ip="$selection"
 
-            hostname=$(getent hosts "$selected_ip" 2>/dev/null | awk '{print $NF}' | sort -u | paste -sd "," - || echo "unknown")
-            mac=$(ip neigh show dev "$interface" to "$selected_ip" 2>/dev/null | awk '{print toupper($5)}' || echo "unknown")
-            link_type=$(ip neigh show dev "$interface" to "$selected_ip" 2>/dev/null | awk '{print $6}' || echo "unknown")
+            hostname=$(getent hosts "$selected_ip" 2>/dev/null | awk '{print $NF}' | sort -u | paste -sd "," - || echo "")
+            mac=$(sudo nmap "$selected_ip" -sn -T4 | tail -n 2 | head -n 1 | cut -d' ' -f3)
+            if [ "${#mac}" = "17" ]; then
+              echo "$ip:$mac"
+            else
+              mac="N/A"
+            fi
 
-            details=$(printf "IP Address:   %s\nHostname(s):  %s\nMAC Address:  %s\nLink Type:    %s" \
-                "$selected_ip" "$hostname" "$mac" "$link_type")
+            details=$(printf "IP Address:   %s\nHostname(s):  %s\nMAC Address:    %s" \
+                "$selected_ip" "$hostname" "$mac")
 
             dialog --title "Details – $selected_ip" --msgbox "$details" 12 70
             ;;
         1|255)  # Cancel or ESC
             clear
             exit 0
-            ;;
-        3)  # Extra button – Rescan
-            if dialog --yesno "Rescan the network now?" 6 40; then
-                scan_network
-                [[ ${#alive_ips[@]} -eq 0 ]] && {
-                    dialog --msgbox "No hosts found after rescan." 8 50
-                    clear
-                    exit 0
-                }
-            fi
             ;;
     esac
 done

@@ -45,6 +45,7 @@ function main(){
   if [ -n "$1" ]; then
     help "main"
   else
+    clear
     updo || throw_exec "updo"
   fi
 }

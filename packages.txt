@@ -2,6 +2,7 @@ iptables-persistent
 git
 ssh
 openssh
+dialog
 python3.13
 python3.13-venv
 python3.13-tk
