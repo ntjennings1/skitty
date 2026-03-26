@@ -36,6 +36,11 @@ function updo(){
   sudo apt-get autoremove -y
   sudo apt-get update -y
   sudo apt-get upgrade -y
+
+  sudo apt autoclean
+  sudo apt autoremove
+  sudo apt update -y
+  sudo apt upgrade -y
 }
 
 # Updates the machine
