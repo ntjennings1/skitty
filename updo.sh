@@ -40,7 +40,7 @@ function updo(){
   sudo apt autoclean
   sudo apt autoremove
   sudo apt update -y
-  sudo apt upgrade -y
+  sudo apt full-upgrade -y
 }
 
 # Updates the machine
