@@ -1,5 +1,8 @@
 #!/bin/bash
 
+DIR=$(dirname "$0")
+LFILE="$DIR/logs/servmon"
+
 function throw_exec(){
   if [ "$1" = "service" ]; then
     echo "[ERR] Missing service."
@@ -65,7 +68,6 @@ function describe(){
 
 function servmon(){
   SERVICE="$1"
-  LOG="$SERVICE.log"
 
   while true; do
     clear
@@ -74,11 +76,11 @@ function servmon(){
     TIME=$(date +"%Y-%m-%d %H:%M:%S")
 
     if [ "$STATUS" == "active" ]; then
-      describe $SERVICE $LOG "Active" $2
-      echo "$TIME - ALERT: $SERVICE is $STATUS" >> "$LOG"
+      describe $SERVICE $LFILE "Active" $2
+      echo "$TIME - ALERT: $SERVICE is $STATUS" >> "$LFILE"
     else
-      describe $SERVICE $LOG "Inactive" $2
-      echo "$TIME - ALERT: $SERVICE is $STATUS" >> "$LOG"
+      describe $SERVICE $LFILE "Inactive" $2
+      echo "$TIME - ALERT: $SERVICE is $STATUS" >> "$LFILE"
     fi
     sleep "$2"
   done

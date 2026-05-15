@@ -1,5 +1,8 @@
 #!/bin/bash
 
+DIR=$(dirname "$0")
+LFILE="$DIR/logs/updo"
+
 function throw_exec(){
   if [ "$1" = "updo" ]; then
     echo "[ERR] Error performing updo."
@@ -30,17 +33,31 @@ function help(){
   fi
 }
 
+function check(){
+  if [ ! -d "$DIR/logs" ]; then
+    mkdir "$DIR/logs"
+  fi
+
+  if [ ! -f "$LFILE" ]; then
+    touch '$LFILE'
+  else
+    rm $LFILE
+    touch $LFILE
+  fi
+}
+
 function updo(){
   logo
-  sudo apt-get clean
-  sudo apt-get autoremove -y
-  sudo apt-get update -y
-  sudo apt-get upgrade -y
+  check
+  sudo apt-get clean >> $LFILE
+  sudo apt-get autoremove -y >> $LFILE
+  sudo apt-get update -y >> $LFILE
+  sudo apt-get upgrade -y >> $LFILE
 
-  sudo apt autoclean
-  sudo apt autoremove
-  sudo apt update -y
-  sudo apt full-upgrade -y
+  sudo apt autoclean >> $LFILE
+  sudo apt autoremove >> $LFILE
+  sudo apt update -y >> $LFILE
+  sudo apt full-upgrade -y >> $LFILE
 }
 
 # Updates the machine

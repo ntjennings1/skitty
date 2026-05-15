@@ -8,5 +8,5 @@ gnuplot -e "
   set ylabel 'Sales';
   set grid;
   set key outside;
-  plot 'data.csv'
+  plot '$1'
 "

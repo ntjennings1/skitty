@@ -19,9 +19,13 @@ cat<<'EOF'
 EOF
 }
 
-function logger(){
-  if [ ! -f $LFILE ]; then
-    touch '$LFILE'
+function check(){
+  if [ ! -d "$DIR/logs" ]; then
+    mkdir "$DIR/logs"
+  fi
+
+  if [ ! -f "$LFILE" ]; then
+    touch $LFILE
   else
     rm $LFILE
     touch $LFILE
@@ -30,11 +34,11 @@ function logger(){
 
 function enstaller(){
   efile='packages.txt'
-  logger
+  check
   for e in $(cat $efile); do
-    echo '' >> $LFILE
-    echo "[-->] Installing $e." >> $LFILE
-    sudo apt-get install $e -y >> $LFILE || sudo apt install $e -y >> $LFILE
+    echo '' >> "$LFILE"
+    echo "[-->] Installing $e." >> "$LFILE"
+    sudo apt-get install $e -y >> "$LFILE" || sudo apt install $e -y >> "$LFILE"
   done
 }
 
