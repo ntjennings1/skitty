@@ -8,6 +8,8 @@ postgresql-contrib
 gnuplot
 macchanger
 proxychains
+tor
+torbrowser-launcher
 tmux
 dialog
 ufw
@@ -56,4 +58,5 @@ netexec
 crackmapexec
 impacket-scripts
 metasploit-framework
-
+gvm
+openvas
