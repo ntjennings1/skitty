@@ -1,4 +1,3 @@
-libx11-dev
 build-essential
 nvidia-driver
 nvidia-cuda-toolkit
